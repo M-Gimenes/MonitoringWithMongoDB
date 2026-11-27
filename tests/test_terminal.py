@@ -38,3 +38,22 @@ def test_escolher(monkeypatch):
 
 def test_formatar():
     assert terminal.formatar_data_hora(datetime(2026, 11, 27, 14, 0, tzinfo=timezone.utc)) == "27/11/2026 11:00"
+
+
+def test_tabela_adapta_a_largura_sem_cortar_dados(monkeypatch, capsys):
+    colunas = ("Nível", "Ocorrência", "Horário local", "Detalhes")
+    linhas = [("EMERGÊNCIA", "Chuva intensa\nAtivo", "26/11/2026 16:00", "Gilson Carone")]
+
+    monkeypatch.setenv("COLUMNS", "88")
+    terminal.tabela(colunas, linhas)
+    larga = capsys.readouterr().out
+    assert "HORÁRIO LOCAL" in larga and "26/11/2026 16:00" in larga
+    assert "\033[" not in larga
+
+    monkeypatch.setenv("COLUMNS", "38")
+    terminal.tabela(colunas, linhas)
+    estreita = capsys.readouterr().out
+    assert "Nível: EMERGÊNCIA" in estreita
+    assert "Detalhes: Gilson Carone" in estreita
+    assert "Ativo" in estreita
+    assert all(len(linha) <= 38 for linha in estreita.splitlines())

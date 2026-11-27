@@ -12,9 +12,15 @@ def entradas(monkeypatch, *valores):
 
 def test_busca_alertas_ativos_pelo_menu(db, monkeypatch, capsys):
     inserir_alerta(db, {"tipo": "chuva_intensa", "nivel": 2, "bairros_afetados": ["Centro"]})
+    inserir_alerta(db, {"tipo": "enchente", "nivel": 1, "bairros_afetados": ["Centro"]})
+    monkeypatch.setenv("COLUMNS", "88")
     entradas(monkeypatch, "4", "1", "0", "0")
     main(db)
-    assert "chuva_intensa" in capsys.readouterr().out
+    saida = capsys.readouterr().out
+    assert "Chuva intensa" in saida
+    assert "[1] ⌖ Sensores" in saida
+    assert "◆ ALERTA" in saida
+    assert "\n\n  △ ATENÇÃO" in saida
 
 
 def test_opcao_invalida_nao_derruba(db, monkeypatch, capsys):

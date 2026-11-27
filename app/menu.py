@@ -2,7 +2,7 @@
 from datetime import datetime, time, timedelta, timezone
 
 from pymongo.database import Database
-from pymongo.errors import ServerSelectionTimeoutError
+from pymongo.errors import PyMongoError, ServerSelectionTimeoutError
 
 from app import buscas
 from app.alertas import (
@@ -80,7 +80,10 @@ def _codigos(db: Database) -> dict:
 
 
 def _confirmar(pergunta: str) -> bool:
-    return ler_texto(f"{pergunta} (s/n)", padrao="n").lower() == "s"
+    if ler_texto(f"{pergunta} (s/n)", padrao="n").lower().startswith("s"):
+        return True
+    print("Operação cancelada.")
+    return False
 
 
 def _escolher_sensor(db: Database) -> dict | None:
@@ -356,6 +359,10 @@ def _submenu(db: Database, titulo: str, acoes: list) -> None:
             acoes[i][1](db)
         except ValueError as erro:
             print(f"Erro: {erro}")
+        except PyMongoError as erro:
+            detalhe = str(erro).splitlines()[0][:150]
+            print(f"Erro no banco de dados: {detalhe}")
+            print("Verifique se o MongoDB está rodando (docker compose up -d).")
 
 
 def main(db: Database | None = None) -> None:

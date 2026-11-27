@@ -68,6 +68,14 @@ def avaliar_medidas(limiares: dict, medidas: dict) -> list[dict]:
     return resultado
 
 
+def validar_ponto(longitude: float, latitude: float) -> None:
+    """Garante coordenadas válidas (também rejeita NaN)."""
+    if not -180 <= longitude <= 180:
+        raise ValueError("Longitude deve estar entre -180 e 180 (ex.: -41.1129)")
+    if not -90 <= latitude <= 90:
+        raise ValueError("Latitude deve estar entre -90 e 90 (ex.: -20.8489)")
+
+
 def tipo_alerta(variavel: str, sensor: dict) -> str:
     if variavel == "chuva_24h_mm" and sensor.get("area_de_risco") == "encosta":
         return "deslizamento"

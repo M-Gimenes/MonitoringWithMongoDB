@@ -4,7 +4,7 @@ from datetime import date, datetime, time, timedelta
 
 from pymongo.database import Database
 
-from app.regras import FUSO
+from app.regras import FUSO, validar_ponto
 from app.sensores import buscar_sensor
 
 
@@ -27,7 +27,8 @@ def resumo_diario(db: Database, dia: date) -> list[dict]:
     inicio = datetime.combine(dia, time.min, tzinfo=FUSO)
     fim = inicio + timedelta(days=1)
     pipeline = [
-        {"$match": {"ts": {"$gte": inicio, "$lt": fim}}},
+        # Leituras com falha ou suspeitas não entram no resumo.
+        {"$match": {"ts": {"$gte": inicio, "$lt": fim}, "qualidade": "ok"}},
         {"$group": {
             "_id": "$sensor_id",
             "leituras": {"$sum": 1},
@@ -57,6 +58,9 @@ def resumo_diario(db: Database, dia: date) -> list[dict]:
 
 def sensores_proximos(db: Database, longitude: float, latitude: float, raio_km: float) -> list[dict]:
     """4. Sensores num raio de X km de um ponto, do mais perto para o mais longe."""
+    validar_ponto(longitude, latitude)
+    if not raio_km >= 0:
+        raise ValueError("O raio deve ser zero ou positivo")
     filtro = {"localizacao": {"$near": {
         "$geometry": {"type": "Point", "coordinates": [longitude, latitude]},
         "$maxDistance": raio_km * 1000,

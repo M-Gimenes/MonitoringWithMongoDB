@@ -55,6 +55,26 @@ def test_sensores_proximos(db, sensor_exemplo):
     assert [s["codigo"] for s in buscas.sensores_proximos(db, -41.1129, -20.8489, 50)] == ["CENTRO", "CASTELO"]
 
 
+@pytest.mark.parametrize("lon, lat, raio", [
+    (-41.1, -208489, 5),          # latitude sem o ponto decimal
+    (-411129, -20.8, 5),          # longitude sem o ponto decimal
+    (-41.1, -20.8, -5),           # raio negativo
+    (float("nan"), -20.8, 5),
+])
+def test_sensores_proximos_rejeita_valores_fora_da_faixa(db, lon, lat, raio):
+    with pytest.raises(ValueError):
+        buscas.sensores_proximos(db, lon, lat, raio)
+
+
+def test_resumo_diario_ignora_leituras_com_falha(db, sensor_exemplo):
+    inserir_sensor(db, sensor_exemplo())
+    d = datetime(2026, 11, 27, 15, 0, tzinfo=UTC)
+    registrar_leitura(db, "CI-PLU-03", {"chuva_mm": 1.0}, ts=d)
+    registrar_leitura(db, "CI-PLU-03", {"chuva_mm": 999.0}, ts=d + timedelta(hours=1), qualidade="falha")
+    [r] = buscas.resumo_diario(db, date(2026, 11, 27))
+    assert r["chuva_total"] == 1.0 and r["leituras"] == 1
+
+
 def test_alertas_por_bairro_sem_diferenciar_maiusculas(db):
     inserir_alerta(db, {"tipo": "deslizamento", "nivel": 2, "bairros_afetados": ["Gilson Carone"]})
     inserir_alerta(db, {"tipo": "enchente", "nivel": 2, "bairros_afetados": ["Centro"]})

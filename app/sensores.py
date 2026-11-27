@@ -4,7 +4,7 @@ import copy
 from pymongo.database import Database
 from pymongo.errors import DuplicateKeyError
 
-from app.regras import LIMIARES_PADRAO, TIPOS_SENSOR
+from app.regras import LIMIARES_PADRAO, TIPOS_SENSOR, validar_ponto
 
 STATUS_SENSOR = ("operacional", "manutencao", "inativo")
 
@@ -22,6 +22,8 @@ def inserir_sensor(db: Database, dados: dict) -> str:
         raise ValueError(f"Tipo inválido: {dados['tipo']}. Use um de: {', '.join(TIPOS_SENSOR)}")
 
     doc = {chave: valor for chave, valor in dados.items() if valor is not None}
+    if "localizacao" in doc:
+        validar_ponto(*doc["localizacao"]["coordinates"])
     doc.setdefault("status", "operacional")
     doc.setdefault("limiares", copy.deepcopy(LIMIARES_PADRAO[doc["tipo"]]))
     _validar_status(doc["status"])

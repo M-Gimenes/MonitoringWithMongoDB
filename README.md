@@ -19,16 +19,28 @@ Todos os comandos são executados na pasta do projeto.
 docker compose up -d
 ```
 
-**2. Instalar as dependências do Python**
+**2. Criar o ambiente Python e instalar as dependências**
 
-```bash
-python -m venv .venv
-# Windows:      .venv\Scripts\activate
-# Linux/macOS:  source .venv/bin/activate
-pip install -r requirements.txt
+Windows (PowerShell ou cmd):
+
+```powershell
+py -m venv .venv
+.venv\Scripts\python -m pip install -r requirements.txt
 ```
 
-> No Windows, se `python` não for encontrado, use `py`.
+Linux/macOS:
+
+```bash
+python3 -m venv .venv
+.venv/bin/python -m pip install -r requirements.txt
+```
+
+> Nos passos seguintes, `python` significa o Python do venv: `.venv\Scripts\python` no Windows ou `.venv/bin/python` no Linux/macOS.
+>
+> Também dá para ativar o venv:
+> - **PowerShell:** `.venv\Scripts\activate`. Se aparecer "a execução de scripts foi desabilitada", rode antes `Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass`.
+> - **Git Bash:** `source .venv/Scripts/activate`.
+> - **Linux/macOS:** `source .venv/bin/activate`.
 
 **3. Popular o banco** (escolha uma das opções)
 
@@ -46,7 +58,12 @@ pip install -r requirements.txt
   ```
 
   > No Git Bash, coloque `MSYS_NO_PATHCONV=1` antes do comando.
-  >
+
+  O banco entregue tem leituras de **24/11/2026 02:00 a 27/11/2026 01:00** (horário de Brasília):
+  - **24/11:** onda de calor;
+  - **26/11:** chuva forte, seguida de cheia do rio.
+
+  Nas buscas 2 e 3, use datas desse período (ex.: resumo do dia **26/11/2026**). Na Opção A, os dados terminam na hora em que o script for rodado.
 
 **4. Rodar o sistema**
 
@@ -64,7 +81,7 @@ Os testes usam um banco separado (`risco_ambiental_test`) e não alteram os dado
 
 ## Banco de dados
 
-Banco `risco_ambiental`, com 3 coleções:
+Banco `risco_ambiental`, com 3 coleções. O modelo completo, com exemplos de documentos, está em [docs/design.md](docs/design.md).
 
 | Coleção     | O que guarda                                                                                                                                                                                                                                       |
 | ------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |

@@ -21,6 +21,11 @@ def test_tipo_invalido(db, sensor_exemplo):
         inserir_sensor(db, sensor_exemplo(tipo="radar"))
 
 
+def test_coordenadas_fora_da_faixa(db, sensor_exemplo):
+    with pytest.raises(ValueError, match="Longitude"):
+        inserir_sensor(db, sensor_exemplo(localizacao={"type": "Point", "coordinates": [-411129, -20.8]}))
+
+
 def test_listar_filtra_e_ordena(db, sensor_exemplo):
     inserir_sensor(db, sensor_exemplo(codigo="B"))
     inserir_sensor(db, sensor_exemplo(codigo="A"))

@@ -1,6 +1,6 @@
 # Roteiro da apresentação (10 minutos, 2 pessoas)
 
-Sem slides: tudo é mostrado no terminal. **A** e **B** são os dois apresentadores.
+Sem slides. A demonstração acontece no terminal, com duas passagens rápidas pelo código no editor. **A** e **B** são os dois apresentadores.
 
 | Tempo | Quem | Bloco |
 |---|---|---|
@@ -31,7 +31,8 @@ Sem slides: tudo é mostrado no terminal. **A** e **B** são os dois apresentado
      ```powershell
      .venv\Scripts\python main.py
      ```
-4. Ensaiar uma vez cronometrando. Os passos marcados como *(opcional)* podem ser cortados se o tempo apertar.
+4. Deixar `app/regras.py` e `app/alertas.py` abertos no editor, com a fonte grande.
+5. Ensaiar uma vez cronometrando. Os passos marcados como *(opcional)* podem ser cortados se o tempo apertar.
 
 **Os dados do dump:**
 - leituras de 24/11/2026 02:00 a 27/11/2026 01:00;
@@ -109,11 +110,21 @@ db.alerts.findOne({ tipo: "deslizamento" })
 - **Digitar:** `3` → `4` (CI-PLU-05) → `1` (Status) → `2` (manutencao) → `1` (Listar) → `0`
 - **Falar:** "O sensor do Village da Luz entrou em manutenção."
 
+**Código após o passo 2 · `regras.py` (15 s)**
+
+- **Mostrar** `LIMIARES_PADRAO`, na linha de `chuva_1h_mm` do pluviômetro.
+- **Falar** “O pluviômetro do Gilson Carone usa estes limites. Em uma hora, 20 mm dão atenção, 30 mm dão alerta e 60 mm dão emergência. Vamos testar com 65 mm.” Voltar ao Terminal 2.
+
 **3. Registrar uma leitura que gera alerta** (o momento principal da demonstração)
 - **Digitar:** `2` → `2` → `CI-PLU-03` → chuva_mm `20` → chuva_1h_mm `65` → Enter (pula chuva_24h_mm) → Enter (data/hora atual) → `1` (ok)
-- **Aparece:** `>> Alerta: [EMERGÊNCIA] chuva_intensa ...`
-- **Falar:** "Chegou uma leitura de 65 mm em uma hora no Gilson Carone. Já existia um alerta de nível 2 para esse sensor. O sistema **não criou um alerta duplicado**: ele **subiu o mesmo alerta para emergência** e passou a avisar também por SMS."
-- Se for pular o passo 4, digite `0` para voltar ao menu principal.
+- **Aparece** a tabela “Alertas gerados ou elevados pela leitura”, com **EMERGÊNCIA**, chuva intensa, 65 mm medidos e limiar de 60 mm.
+- **Falar** “Os 65 mm em uma hora no Gilson Carone elevaram o alerta ativo de nível 2 para emergência.”
+
+**Código após o passo 3 · `alertas.py` (25 s)**
+
+- **Mostrar** `processar_leitura`, primeiro a chamada a `avaliar_medidas` de `regras.py`, depois o `find_one` e o `elif` com `find_one_and_update`.
+- **Falar** “`avaliar_medidas` compara a leitura com os limites salvos no sensor. Com 65 mm, devolve o nível 3. `processar_leitura` encontrou um alerta ativo do mesmo sensor para chuva em uma hora e atualizou o próprio documento no MongoDB com o novo nível, o valor de 65 mm e o limiar de 60 mm.”
+- Voltar ao Terminal 2. Se for pular o passo 4, digitar `0` para voltar ao menu principal.
 
 **4. Leitura com falha não dispara alerta** *(opcional)*
 - **Digitar:** `2` → `CI-PLU-05` → Enter → `99` → Enter → Enter → `3` (falha) → `0`
